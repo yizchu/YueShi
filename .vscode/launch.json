@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [{
+    "name": "运行 YueShi Demo",
+    "type": "node",
+    "request": "launch",
+    "program": "${workspaceFolder}/server.mjs",
+    "runtimeArgs": ["--env-file-if-exists=.env"],
+    "cwd": "${workspaceFolder}",
+    "console": "integratedTerminal",
+    "serverReadyAction": { "pattern": "YueShi ready: (https?://\\S+)", "uriFormat": "%s", "action": "openExternally" }
+  }]
+}
