@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EduEval · 教学能力评估</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">EduEval</span>
+      <span class="sub">初中数学讲题 · 教学能力评估</span>
+    </div>
+    <div class="topbar-meta" id="topbarMeta">加载中…</div>
+  </header>
+
+  <nav class="steps" id="steps">
+    <div class="step is-active" data-step="1"><b>1</b><span>抽题与讲稿</span></div>
+    <div class="step" data-step="2"><b>2</b><span>虚拟学生问答</span></div>
+    <div class="step" data-step="3"><b>3</b><span>评估报告</span></div>
+  </nav>
+
+  <main>
+    <!-- ============ 步骤 1：选题 + 讲稿 ============ -->
+    <section class="panel" id="panelStart">
+      <h2>提交一份讲题讲稿</h2>
+      <p class="hint">
+        题目由系统随机抽取——抽到什么讲什么，不能自选。按题面备课后粘贴逐字讲稿，
+        提交后系统抽取 3 类学生人设各生成 1 个问题；问题逐轮揭示，答完当前这一问才能看到下一问。
+      </p>
+
+      <div class="draw-box" id="drawBox">
+        <div class="draw-head">
+          <span class="field-label">抽到的题目</span>
+          <button class="btn btn-ghost btn-sm" id="btnRedraw" type="button">换一题</button>
+        </div>
+        <p class="draw-title" id="drawTitle">正在抽题…</p>
+        <p class="draw-task" id="drawTask"></p>
+        <small class="field-hint" id="questionMeta"></small>
+      </div>
+
+      <label class="field">
+        <span class="field-label">逐字讲稿</span>
+        <textarea id="lectureInput" rows="14"
+          placeholder="把你要讲的话逐字写下来：开场怎么引入、关键步骤怎么讲、哪里要强调易错点、最后怎么收尾……"></textarea>
+        <small class="field-hint"><span id="lectureCount">0</span> 字</small>
+      </label>
+
+      <div class="row">
+        <label class="field field-inline">
+          <span class="field-label">被试标识</span>
+          <input id="candidateInput" type="text" value="web-user">
+        </label>
+        <label class="check" id="dryRunLabel">
+          <input id="dryRunInput" type="checkbox">
+          <span>演示模式（桩数据，不调用模型）</span>
+        </label>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-primary" id="btnStart">开始评估</button>
+        <span class="err" id="startErr"></span>
+      </div>
+    </section>
+
+    <!-- ============ 步骤 2：逐轮问答 ============ -->
+    <section class="panel hidden" id="panelAnswer">
+      <h2>回答虚拟学生的提问</h2>
+      <p class="hint" id="answerHint"></p>
+      <div id="qaList" class="qa-list"></div>
+      <div class="actions">
+        <button class="btn btn-primary" id="btnScore" disabled>生成评估报告</button>
+        <button class="btn btn-ghost" id="btnRestart">重新开始</button>
+        <span class="err" id="answerErr"></span>
+      </div>
+    </section>
+
+    <!-- ============ 步骤 3：报告 ============ -->
+    <section class="panel hidden" id="panelReport"></section>
+  </main>
+
+  <div class="overlay hidden" id="overlay">
+    <div class="overlay-box">
+      <div class="spinner"></div>
+      <p id="overlayText">正在处理…</p>
+    </div>
+  </div>
+
+  <div class="toast hidden" id="toast"></div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

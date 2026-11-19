@@ -1,0 +1,71 @@
+{
+  "id": "M-CZ-001",
+  "title": "科学计数法",
+  "grade": "七年级",
+  "task": "让学生掌握科学记数法的概念，会用科学记数法表示相关数据。",
+  "reference_points": "导入（大数书写不便）→ 复习 10 的乘方 → 用乘方表示大数 → 辨析 A 的取值范围 → 给出定义 → 例 5 练习 → 小结",
+  "checkpoints": [
+    {
+      "id": "CP-1",
+      "description": "用数据情境（太阳半径、光速等）引出「大数书写不便」的问题",
+      "is_core": false,
+      "category": "知识点覆盖"
+    },
+    {
+      "id": "CP-2",
+      "description": "复习 10 的乘方（10²=100、10³=1000…），从旧知搭桥",
+      "is_core": false,
+      "category": "知识点覆盖"
+    },
+    {
+      "id": "CP-3",
+      "description": "得出「乘方可以表示特别大的数，且书写简单」的结论",
+      "is_core": false,
+      "category": "知识点覆盖"
+    },
+    {
+      "id": "CP-4",
+      "description": "引导用乘方简化表示大数（如 300000000 → 3×10⁸）",
+      "is_core": false,
+      "category": "知识点覆盖"
+    },
+    {
+      "id": "CP-5",
+      "description": "通过讨论/归纳得出科学计数法的定义（A×10ⁿ）",
+      "is_core": false,
+      "category": "知识点覆盖"
+    },
+    {
+      "id": "CP-6",
+      "description": "强调 A 的取值范围（1 ≤ A < 10）",
+      "is_core": true,
+      "category": "重点难点"
+    },
+    {
+      "id": "CP-7",
+      "description": "例 5 讲清「整数位数 / 小数点位置」与 n 的关系（讲方法而非只给答案）",
+      "is_core": false,
+      "category": "重点难点"
+    },
+    {
+      "id": "CP-8",
+      "description": "课堂小结：回顾定义与 A 的取值范围",
+      "is_core": false,
+      "category": "知识点覆盖"
+    }
+  ],
+  "pitfalls": [
+    {
+      "id": "E1",
+      "description": "A 没卡在 1~10（如 0.5×10⁶、696×10³）"
+    },
+    {
+      "id": "E2",
+      "description": "n 数错位数（未讲清 n = 整数位数 − 1）"
+    },
+    {
+      "id": "E3",
+      "description": "小于 1 的数误用科学计数法（如 0.0001）"
+    }
+  ]
+}

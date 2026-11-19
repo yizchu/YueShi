@@ -1,0 +1,24 @@
+# EduEval 运行配置（入库，便于复现）
+# 密钥请放 .env：LLM_API_KEY / LLM_BASE_URL / LLM_MODEL
+
+llm:
+  base_url: "https://api.deepseek.com"
+  model: "deepseek-chat"
+
+temperature:
+  qa: 0.8            # 提问生成：需要多样性
+  score: 0.5         # 评分：需要稳定
+  suggestion: 0.7    # 建议生成：自然语言
+
+limits:
+  min_script_words: 300     # 讲稿字数下限
+  min_answer_words: 50      # 回答字数下限
+  max_script_words: 8000    # 讲稿截断上限
+
+qa:
+  rounds: 3                 # 固定 3 轮问答
+  persona_count: 3          # 从 5 类人设中抽 3 类
+
+paths:
+  datasets: "datasets"
+  workspace: "workspace"

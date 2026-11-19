@@ -1,0 +1,8 @@
+# EduEval 依赖
+openai>=1.30,<2.0
+pyyaml>=6.0
+fastapi>=0.110
+uvicorn>=0.26
+
+# 以下可选：缺失时相关功能降级
+# pytest>=8.0        # 单元测试
