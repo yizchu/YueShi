@@ -35,6 +35,7 @@ from edu_eval.models import (
 )
 from edu_eval.qa_gen import generate_questions
 from edu_eval.reporter import render_report
+from edu_eval.session_store import reserve_session, write_snapshot
 from edu_eval.scorer import make_rating, score_all
 
 STATIC = Path(__file__).resolve().parent / "static"
@@ -76,16 +77,6 @@ _sessions: dict[str, Session] = {}
 _sessions_lock = threading.Lock()
 
 
-def make_session_id() -> str:
-    """生成不冲突的会话编号（同秒多次提交时追加序号）。"""
-    base = "EV-" + datetime.now().strftime("%Y%m%d-%H%M%S")
-    candidate, n = base, 1
-    while (path_config()["workspace"] / candidate / "session.json").exists():
-        n += 1
-        candidate = f"{base}-{n}"
-    return candidate
-
-
 def get_session(session_id: str) -> Session:
     """取会话：优先内存，其次从磁盘恢复（服务重启后仍可续看/续评）。"""
     if not SESSION_ID.match(session_id):
@@ -98,7 +89,7 @@ def get_session(session_id: str) -> Session:
         if session is None:
             raise HTTPException(status_code=404, detail=f"会话不存在：{session_id}")
         with _sessions_lock:
-            _sessions[session_id] = session
+            session = _sessions.setdefault(session_id, session)
     return session
 
 
@@ -175,8 +166,8 @@ def _persist(session: Session) -> None:
     if session.report_payload:
         payload["rating"] = session.report_payload["rating"]
         payload["report"] = session.report_payload
-    (session_dir / "session.json").write_text(
-        json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
+    write_snapshot(
+        session_dir / "session.json", json.dumps(payload, ensure_ascii=False, indent=2)
     )
 
 
@@ -393,7 +384,7 @@ def api_create_session(req: CreateSessionRequest) -> dict:
         raise HTTPException(status_code=502, detail=f"提问生成失败：{exc}") from exc
 
     session = Session(
-        session_id=make_session_id(),
+        session_id=reserve_session(path_config()["workspace"]).name,
         question=question,
         lecture=lecture,
         candidate_id=(req.candidateId or "web-user").strip(),
@@ -401,9 +392,9 @@ def api_create_session(req: CreateSessionRequest) -> dict:
     )
     session.questions = questions
 
+    _persist(session)
     with _sessions_lock:
         _sessions[session.id] = session
-    _persist(session)
     return _session_detail(session)
 
 
@@ -502,7 +493,7 @@ def api_score(session_id: str) -> dict:
         session.status = "scored"
 
         session_dir = path_config()["workspace"] / session.id
-        (session_dir / "report.md").write_text(session.markdown, encoding="utf-8")
+        write_snapshot(session_dir / "report.md", session.markdown)
         _persist(session)
     return session.report_payload
 
