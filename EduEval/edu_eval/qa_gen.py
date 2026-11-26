@@ -91,20 +91,13 @@ def generate_questions(
             temperature=config["temperature"]["qa"] + attempt * 0.1,
             task="qa_generation",
         )
-        try:
-            questions = _parse_questions(data, personas)
-        except (AttributeError, TypeError, ValueError):
-            questions = []
-        if ([q.round for q in questions] != list(range(1, rounds + 1))
-                or not all(q.text and q.persona_id for q in questions)
-                or len({q.persona_id for q in questions}) != rounds):
-            reason = "提问内容、人设或轮次不完整"
-        else:
-            ok, reason = check_distinct(questions)
-            if ok:
-                return questions
-            last = questions
-        logger.warning("问题校验未通过（%s），已尝试 %d/%d 次（含重试）", reason, attempt + 1, max_retry + 1)
+        questions = _parse_questions(data, personas)
+
+        ok, reason = check_distinct(questions) if questions else (False, "问题数量不足")
+        if ok and len(questions) == rounds:
+            return questions
+        last = questions
+        logger.warning("问题校验未通过（%s），重试 %d/%d", reason, attempt + 1, max_retry)
 
     if last:
         logger.warning("已达重试上限，采用最后一次生成结果（请在报告中留意问题质量）")
@@ -145,7 +138,7 @@ def _parse_questions(data: dict, personas: list[Persona]) -> list[GeneratedQuest
                 round=int(item.get("round", len(result) + 1)),
                 persona_id=persona_id,
                 persona_name=name,
-                text=item.get("text", "").strip(),
+                text=str(item.get("text", "")).strip(),
                 reference_points=list(item.get("reference_points", [])),
             )
         )

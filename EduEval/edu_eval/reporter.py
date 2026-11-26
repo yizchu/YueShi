@@ -61,7 +61,7 @@ def _rating(report: Report) -> str:
         f"## 评级：**{report.rating}**",
         "",
         f"> 讲稿均分 {report.general_avg:.1f} / 5　｜　"
-        f"问答均分 {report.qa_avg:.1f} / 5　｜　"
+        f"> 问答均分 {report.qa_avg:.1f} / 5　｜　"
         f"采分点 {report.covered_count} / {report.total_checkpoints} 覆盖",
         f"> {core_note}",
     ]

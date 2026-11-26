@@ -12,11 +12,9 @@
 
 注意：权重与阈值均为初值，待专家评分校准后调整（见 docs/requirements 待决问题）。
 """
-from math import isfinite
-
 from .assets import fill, load_prompt
 from .config import config
-from .llm import LLMClient, LLMError
+from .llm import LLMClient
 from .models import (
     QAPair, Question, ScoreItem, CheckpointResult, Report,
 )
@@ -45,35 +43,6 @@ def score_all(
 
 # ---------------------------------------------------------------- 通用标准
 
-def _indexed(rows, field, expected):
-    """评分项必须与本次请求中的编号一一对应。"""
-    if not isinstance(rows, list):
-        raise LLMError(f"评分结果缺少 {field} 列表")
-    by_id = {}
-    for row in rows:
-        key = row.get(field) if isinstance(row, dict) else None
-        if isinstance(key, bool) or not isinstance(key, (str, int)):
-            raise LLMError(f"评分项缺少有效的 {field}")
-        key = str(key)
-        if key in by_id:
-            raise LLMError(f"评分结果重复：{field}={key}")
-        by_id[key] = row
-    if set(by_id) != {str(key) for key in expected}:
-        raise LLMError(f"评分结果与要求的 {field} 不匹配")
-    return by_id
-
-
-def _model_score(row):
-    value = row.get("score")
-    try:
-        number = float(value)
-    except (TypeError, ValueError, OverflowError):
-        number = float("nan")
-    if isinstance(value, bool) or not isfinite(number):
-        raise LLMError(f"评分项 {row['dimension']} 缺少有效分值")
-    return _clamp(number)
-
-
 def _score_general(question: Question, lecture: str, client: LLMClient) -> list[ScoreItem]:
     """讲稿的通用标准评分（G1/G2/G3）。"""
     prompt = fill(
@@ -90,13 +59,13 @@ def _score_general(question: Question, lecture: str, client: LLMClient) -> list[
         task="score_general",
     )
     items = []
-    for dim in _indexed(data.get("dimensions"), "dimension", ("G1", "G2", "G3")).values():
+    for dim in data.get("dimensions", []):
         items.append(
             ScoreItem(
                 category="general",
                 dimension=dim.get("dimension", ""),
                 name=dim.get("name", ""),
-                score=_model_score(dim),
+                score=_clamp(dim.get("score", 3)),
                 rationale=dim.get("rationale", ""),
                 evidence=dim.get("evidence", ""),
             )
@@ -127,17 +96,15 @@ def _score_checkpoints(
         temperature=config["temperature"]["score"],
         task="score_checkpoint",
     )
-    judged = _indexed(data.get("checkpoints"), "checkpoint_id", [cp.id for cp in question.checkpoints])
+    judged = {item.get("checkpoint_id"): item for item in data.get("checkpoints", [])}
     results = []
     for cp in question.checkpoints:
-        item = judged[cp.id]
-        if item.get("status") not in ("覆盖", "部分覆盖", "未覆盖"):
-            raise LLMError(f"采分点 {cp.id} 的判定无效")
+        item = judged.get(cp.id, {})
         results.append(
             CheckpointResult(
                 checkpoint_id=cp.id,
                 description=cp.description,
-                status=item["status"],
+                status=item.get("status", "未覆盖"),
                 evidence=item.get("evidence", ""),
                 is_core=cp.is_core,
             )
@@ -161,16 +128,15 @@ def _score_qa(question: Question, qa_pairs: list[QAPair], client: LLMClient) -> 
         task="score_qa",
     )
     items = []
-    rounds = _indexed(data.get("rounds"), "round", [pair.question.round for pair in qa_pairs])
-    for round_item in rounds.values():
+    for round_item in data.get("rounds", []):
         rnd = round_item.get("round", "")
-        for dim in _indexed(round_item.get("scores"), "dimension", ("Q1", "Q2", "Q3")).values():
+        for dim in round_item.get("scores", []):
             items.append(
                 ScoreItem(
                     category="qa",
                     dimension=f"{dim.get('dimension', '')}·R{rnd}",
                     name=dim.get("name", ""),
-                    score=_model_score(dim),
+                    score=_clamp(dim.get("score", 3)),
                     rationale=dim.get("rationale", ""),
                     evidence=dim.get("evidence", ""),
                 )

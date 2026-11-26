@@ -190,6 +190,7 @@ _DRY_CHECKPOINT = {
         {"checkpoint_id": "CP-6", "status": "覆盖", "evidence": "对于 A 而言要比 10 小、比 1 大"},
         {"checkpoint_id": "CP-7", "status": "部分覆盖", "evidence": "只给出例 5 答案，未讲「n = 整数位数 − 1」的方法"},
         {"checkpoint_id": "CP-8", "status": "覆盖", "evidence": "你说学习了科学记数法，知道了……注意的项"},
+        {"checkpoint_id": "CP-9", "status": "覆盖", "evidence": "希望同学们在课下能够完成课后的相关练习题"},
     ]
 }
 

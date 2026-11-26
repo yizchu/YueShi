@@ -31,7 +31,6 @@ from .models import (
 )
 from .qa_gen import generate_questions
 from .reporter import render_report
-from .session_store import reserve_session, write_snapshot
 from .scorer import score_all, make_rating
 
 logger = get_logger(__name__)
@@ -150,12 +149,8 @@ def cmd_run(args: argparse.Namespace) -> int:
         lecture = _read_lecture(args.lecture)
         if lecture is None:
             return 1
-        if args.out:
-            session_id = make_session_id()
-            session_dir = Path(args.out)
-        else:
-            session_dir = reserve_session(path_config()["workspace"])
-            session_id = session_dir.name
+        session_id = make_session_id()
+        session_dir = Path(args.out) if args.out else path_config()["workspace"] / session_id
     session_dir.mkdir(parents=True, exist_ok=True)
 
     print(f"✓ 题目：{question.label}")
@@ -246,9 +241,10 @@ def cmd_run(args: argparse.Namespace) -> int:
 
     markdown: str = render_report(report)
     report_path: Path = session_dir / "report.md"
-    write_snapshot(report_path, markdown)
-    write_snapshot(
-        session_dir / "session.json", json.dumps(_session_payload(report, args), ensure_ascii=False, indent=2),
+    report_path.write_text(markdown, encoding="utf-8")
+    (session_dir / "session.json").write_text(
+        json.dumps(_session_payload(report, args), ensure_ascii=False, indent=2),
+        encoding="utf-8",
     )
 
     print_summary(report, report_path)
@@ -413,8 +409,8 @@ def _save_progress(
         ],
         "meta": {"dry_run": getattr(args, "dry_run", False)},
     }
-    write_snapshot(
-        session_dir / "session.json", json.dumps(payload, ensure_ascii=False, indent=2)
+    (session_dir / "session.json").write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
     )
 
 
