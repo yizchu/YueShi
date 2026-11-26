@@ -1,0 +1,14 @@
+{
+  "version": "2.0.0",
+  "tasks": [{
+    "label": "启动 YueShi Demo",
+    "type": "process",
+    "command": "node",
+    "args": ["--env-file-if-exists=.env", "server.mjs"],
+    "options": { "cwd": "${workspaceFolder}" },
+    "isBackground": true,
+    "problemMatcher": [],
+    "presentation": { "reveal": "always", "panel": "dedicated" }
+  }]
+}
+
